@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Cog, BarChart2, Boxes, Factory, Users } from 'lucide-react';
 import UpgradeTab from "./UpgradeTab";
+import WorkerTab from "./Worker/WorkerTab";
+import MachinesTab from "./Machines/MachinesTab";
 
 type NavbarItem = "Upgrades" | "Config" | "Resources" | "Machines" | "Workers";
 
@@ -20,11 +22,11 @@ export const navItems: { name: NavbarItem; icon: React.ReactNode; path: string; 
     },
     {
         name: "Machines", icon: <Factory className="w-6 h-6" />, path: "/machines",
-        element: <UpgradeTab />
+        element: <MachinesTab />
     },
     {
         name: "Workers", icon: <Users className="w-6 h-6" />, path: "/workers",
-        element: <UpgradeTab />
+        element: <WorkerTab />
     },
 ];
 

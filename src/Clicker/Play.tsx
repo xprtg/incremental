@@ -11,7 +11,7 @@ const Play: React.FC = () => {
     };
 
     return (
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto mb-4">
             <div style={{ textAlign: 'center' }}>
                 <ScoreDisplay />
                 <Clicker onClick={handleIncrement} label="Click Me!" />

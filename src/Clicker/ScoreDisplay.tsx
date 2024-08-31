@@ -25,6 +25,7 @@ const ScoreDisplay: React.FC = () => {
                     {springProps.number.to(n => Math.floor(n))}
                 </animated.h1>
                 <p className="text-lg mt-2">Current Score</p>
+                <button className='bg-white border rounded-2xl p-3 text-black' onClick={() => console.log(state)}>read state</button>
             </div>
             <div className="w-full bg-gray-800 rounded-full h-2.5 mt-4">
                 <animated.div
