@@ -71,7 +71,7 @@ const initialItemState = Object.keys(itemProgressions).map(item => ({
 }));
 
 const initialState: State = {
-    score: 100,
+    score: 0,
     upgrades: {
         items: initialItemState
     },

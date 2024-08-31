@@ -1,4 +1,4 @@
-import { ItemProgression } from "./ScoreContext";
+import { ItemProgression } from "../ScoreContext";
 
 export const itemProgressions: Record<string, ItemProgression[]> = {
     heat: [
