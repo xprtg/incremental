@@ -18,7 +18,7 @@ const ScoreDisplay: React.FC = () => {
     }, [state.score]);
 
     return (
-        <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg mb-4 flex flex-col items-center">
+        <div className="bg-white text-black p-6 rounded-lg shadow-lg mb-4 flex flex-col items-center">
             <Factory className="text-4xl mb-4" />
             <div className="w-full flex flex-col items-center">
                 <animated.h1 className="text-4xl font-bold">

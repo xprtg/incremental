@@ -18,7 +18,7 @@ const Play: React.FC = () => {
                     <ScoreDisplay />
                     <Clicker onClick={handleIncrement} label="Click Me!" />
                     <div className='mt-5'>
-                        <div className='bg-gray-800 text-white p-6 rounded-lg shadow-lg mb-4 flex flex-col items-center'>
+                        <div className='bg-white text-black p-6 rounded-lg shadow-lg mb-4 flex flex-col items-center'>
                             <h2 >Upgrades</h2>
                         </div>
                         {state.upgrades.items.map((item) => (
