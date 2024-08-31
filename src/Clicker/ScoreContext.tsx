@@ -1,5 +1,7 @@
 import React, { createContext, useReducer, useContext, ReactNode } from 'react';
-import { itemProgressions } from './itemProgressions';
+import { itemProgressions } from './db/itemProgressions';
+
+type Currency = "Ether" | "Iron"
 
 export interface Worker {
     id: string;
@@ -9,9 +11,11 @@ export interface Worker {
 
 export interface Machine {
     id: string;
+    name: string;
     cost: number;
     workers: string[]; // Number of workers assigned to this machine
     rate: number; // Rate at which this machine generates score
+    currency: Currency
 }
 
 interface WorkerProgression extends ItemProgression { }
@@ -56,7 +60,7 @@ type Action =
     | { type: 'BUY_WORKER'; payload: { cost: number } }
     | { type: 'ASSIGN_WORKER'; payload: { machineId: string } }
     | { type: 'UNASSIGN_WORKER'; payload: { machineId: string } }
-    | { type: 'BUY_MACHINE'; payload: { id: string; cost: number; rate: number } };
+    | { type: 'BUY_MACHINE'; payload: Machine };
 
 const initialItemState = Object.keys(itemProgressions).map(item => ({
     id: item, limit: 9, level: 0
@@ -192,9 +196,9 @@ const scoreReducer = (state: State, action: Action): State => {
         case 'BUY_MACHINE': {
             if (state.score < action.payload.cost) return state;
 
-            const newMachines = [
+            const newMachines: Machine[] = [
                 ...state.machines.list,
-                { id: action.payload.id, cost: action.payload.cost, workers: [], rate: action.payload.rate }
+                action.payload
             ];
 
             return {

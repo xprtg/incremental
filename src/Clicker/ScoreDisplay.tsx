@@ -3,6 +3,8 @@ import { useScore } from './ScoreContext';
 import { useSpring, animated } from '@react-spring/web';
 import { Factory } from 'lucide-react';
 
+const MAX_SCORE = 100000; // Define your maximum score here
+
 const ScoreDisplay: React.FC = () => {
     const { state } = useScore();
     const [displayScore, setDisplayScore] = useState(0);
@@ -25,13 +27,13 @@ const ScoreDisplay: React.FC = () => {
                     {springProps.number.to(n => Math.floor(n))}
                 </animated.h1>
                 <p className="text-lg mt-2">Current Score</p>
-                <button className='bg-white border rounded-2xl p-3 text-black' onClick={() => console.log(state)}>read state</button>
+                {/* <button className='bg-white border rounded-2xl p-3 text-black' onClick={() => console.log(state)}>read state</button> */}
             </div>
             <div className="w-full bg-gray-800 rounded-full h-2.5 mt-4">
                 <animated.div
                     className="bg-green-500 h-2.5 rounded-full"
                     style={{
-                        width: springProps.number.to(n => `${Math.min(n / 10, 100)}%`) // Update progress bar width
+                        width: springProps.number.to(n => `${Math.min((n / MAX_SCORE) * 100, 100)}%`) // Update progress bar width
                     }}
                 />
             </div>

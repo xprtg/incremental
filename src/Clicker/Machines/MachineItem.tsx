@@ -25,7 +25,7 @@ export default function MachineItem({ machine }: Props) {
     return (
         <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4">
-                <h3 className="text-2xl font-bold text-white">Machine {machine.id}</h3>
+                <h3 className="text-2xl font-bold text-white">{machine.name}</h3>
             </div>
             <div className="p-6">
                 <div className="grid grid-cols-2 gap-4 mb-4">

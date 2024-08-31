@@ -1,9 +1,9 @@
 import React from 'react'
 import { useScore } from './ScoreContext'
-import { itemProgressions } from './itemProgressions'
 import useProgressTimer from './useProgressTimer'
 import { Factory, ArrowUp, Coins, TrendingUp } from 'lucide-react'
 import TimerBar from './TimerBar'
+import { itemProgressions } from './db/itemProgressions'
 
 interface UpgradeItemProps {
     item: {
