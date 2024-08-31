@@ -30,7 +30,7 @@ const UpgradeItem: React.FC<UpgradeItemProps> = ({ item }) => {
     }
 
     return (
-        <div className="bg-white text-gray-800 p-6 rounded-lg shadow-md mb-4 flex flex-col items-center border border-gray-200">
+        <div className="bg-white text-gray-800 p-6 rounded-lg shadow-md flex flex-col items-center border border-gray-200">
             <div className="w-full flex items-center justify-between mb-4">
                 <Factory className="text-2xl text-blue-500" />
                 <p className="text-lg font-semibold text-blue-600">

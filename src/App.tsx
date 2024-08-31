@@ -1,11 +1,7 @@
-import Play from "./Clicker/Play";
-import { ScoreProvider } from "./Clicker/ScoreContext";
-
-function App() {
+const App = () => {
   return (
-    <ScoreProvider>
-      <Play />
-    </ScoreProvider>
+    <>
+    </>
   );
 }
 
