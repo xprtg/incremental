@@ -2,13 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { useScore } from './ScoreContext';
 import { useSpring, animated } from '@react-spring/web';
 import { Factory } from 'lucide-react';
-
-const MAX_SCORE = 100000; // Define your maximum score here
+import { LEVEL_THRESHOLDS } from './db/user';
 
 const ScoreDisplay: React.FC = () => {
     const { state } = useScore();
     const [displayScore, setDisplayScore] = useState(0);
 
+    const currentLevelThreshold = LEVEL_THRESHOLDS[state.level];
+    const nextLevelThreshold = LEVEL_THRESHOLDS[state.level + 1] || (currentLevelThreshold * 2); // Default to double if no next level
+
+    // Setup spring animation for the score
     const springProps = useSpring({
         number: state.score,
         from: { number: displayScore },
@@ -27,13 +30,15 @@ const ScoreDisplay: React.FC = () => {
                     {springProps.number.to(n => Math.floor(n))}
                 </animated.h1>
                 <p className="text-lg mt-2">Current Score</p>
-                {/* <button className='bg-white border rounded-2xl p-3 text-black' onClick={() => console.log(state)}>read state</button> */}
+            </div>
+            <div className="w-full flex flex-col items-center">
+                <span>Level: {state.level}</span>
             </div>
             <div className="w-full bg-gray-800 rounded-full h-2.5 mt-4">
                 <animated.div
                     className="bg-green-500 h-2.5 rounded-full"
                     style={{
-                        width: springProps.number.to(n => `${Math.min((n / MAX_SCORE) * 100, 100)}%`) // Update progress bar width
+                        width: springProps.number.to(n => `${Math.min((n / nextLevelThreshold) * 100, 100)}%`) // Update progress bar width
                     }}
                 />
             </div>

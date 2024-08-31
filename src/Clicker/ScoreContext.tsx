@@ -1,5 +1,7 @@
 import React, { createContext, useReducer, useContext, ReactNode } from 'react';
 import { itemProgressions } from './db/itemProgressions';
+import { LEVEL_THRESHOLDS } from './db/user'
+import { machineProgression } from './db/machines';
 
 type Currency = "Ether" | "Iron"
 
@@ -16,11 +18,12 @@ export interface Machine {
     workers: string[]; // Number of workers assigned to this machine
     rate: number; // Rate at which this machine generates score
     currency: Currency
+    gain: number;
 }
 
 interface WorkerProgression extends ItemProgression { }
 
-interface MachineProgression extends ItemProgression { }
+export interface MachineProgression extends Omit<ItemProgression, 'cost'> { }
 
 interface ItemUpgrade {
     id: string;
@@ -48,6 +51,7 @@ type Machines = {
 
 type State = {
     score: number;
+    level: number;
     upgrades: Upgrades;
     workers: Workers;
     machines: Machines;
@@ -77,12 +81,20 @@ const initialState: State = {
     machines: {
         list: []
     },
+    level: 0
 };
 
 const scoreReducer = (state: State, action: Action): State => {
     switch (action.type) {
-        case 'INCREMENT_SCORE':
-            return { ...state, score: state.score + action.payload };
+        case 'INCREMENT_SCORE': {
+            const newScore = state.score + action.payload;
+            const newLevel = LEVEL_THRESHOLDS.findIndex(threshold => newScore < threshold);
+            return {
+                ...state,
+                score: newScore,
+                level: newLevel === -1 ? LEVEL_THRESHOLDS.length : newLevel
+            };
+        }
 
         case 'BUY_ITEM_UPGRADE': {
             const itemIndex = state.upgrades.items.findIndex((item) => item.id === action.payload.id);
@@ -139,9 +151,22 @@ const scoreReducer = (state: State, action: Action): State => {
 
             const updatedMachines = [...state.machines.list];
             const machine = updatedMachines[machineIndex];
+
             if (!machine.workers.includes(availableWorker.id)) {
                 machine.workers.push(availableWorker.id);
             }
+
+            const workerCount = machine.workers.length;
+            const progression = machineProgression[machine.id][workerCount - 1] || null
+
+            if (!progression) return state;
+
+            const updatedMachine = {
+                ...machine,
+                rate: progression.rate,
+                gain: progression.gain,
+            };
+            updatedMachines[machineIndex] = updatedMachine;
 
             const updatedWorkers = state.workers.list.map(worker =>
                 worker.id === availableWorker.id
@@ -162,29 +187,28 @@ const scoreReducer = (state: State, action: Action): State => {
             if (machineIndex === -1) return state;
 
             const machine = state.machines.list[machineIndex];
-            const workerIdToRemove = machine.workers[0];
+            const workerIdToRemove = machine.workers[0]; // Unassign the first worker (or you can specify which)
 
             if (!workerIdToRemove) return state;
 
             const updatedMachines = [...state.machines.list];
             const updatedMachine = { ...updatedMachines[machineIndex] };
             updatedMachine.workers = updatedMachine.workers.filter(workerId => workerId !== workerIdToRemove);
+
+            // Update machine progression after worker unassignment
+            const workerCount = updatedMachine.workers.length;
+            const progression = machineProgression[updatedMachine.id][workerCount - 1] || machineProgression[updatedMachine.id][0];
+
+            updatedMachine.rate = progression.rate;
+            updatedMachine.gain = progression.gain;
+
             updatedMachines[machineIndex] = updatedMachine;
 
-            const updatedWorkers = [...state.workers.list];
-            const workerIndex = updatedWorkers.findIndex(worker => worker.id === workerIdToRemove);
-
-            if (workerIndex !== -1) {
-                const worker = updatedWorkers[workerIndex];
-                updatedWorkers[workerIndex] = { ...worker, assignedMachines: "" };
-            } else {
-                const newWorker = {
-                    id: workerIdToRemove,
-                    cost: 20,
-                    assignedMachines: ""
-                };
-                updatedWorkers.push(newWorker);
-            }
+            const updatedWorkers = state.workers.list.map(worker =>
+                worker.id === workerIdToRemove
+                    ? { ...worker, assignedMachines: "" }
+                    : worker
+            );
 
             return {
                 ...state,

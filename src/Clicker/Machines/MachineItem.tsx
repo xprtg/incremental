@@ -1,26 +1,33 @@
-import React from 'react'
-import { Machine, useScore } from '../ScoreContext'
-import { Users, DollarSign, TrendingUp, UserPlus, UserMinus } from 'lucide-react'
+import React, { useCallback, useMemo } from 'react';
+import { Machine, useScore } from '../ScoreContext';
+import { Users, DollarSign, TrendingUp, UserPlus, UserMinus } from 'lucide-react';
+import { machineProgression } from '../db/machines';
 
 interface Props {
-    machine: Machine
+    machine: Machine;
 }
 
 export default function MachineItem({ machine }: Props) {
-    const { state, dispatch } = useScore()
-    const availableWorker = state.workers.list.find(worker => worker.assignedMachines === "")
+    const { state, dispatch } = useScore();
+    const availableWorker = state.workers.list.find(worker => worker.assignedMachines === "");
 
-    const handleAssignWorker = () => {
-        if (availableWorker) {
-            dispatch({ type: 'ASSIGN_WORKER', payload: { machineId: machine.id } })
+    // Determine if the machine can accept another worker based on its progression
+    const canAssignWorker = useMemo(() => {
+        const progressionLimit = machineProgression[machine.id][machine.workers.length];
+        return availableWorker && progressionLimit;
+    }, [machine.id, machine.workers.length, availableWorker]);
+
+    const handleAssignWorker = useCallback(() => {
+        if (canAssignWorker) {
+            dispatch({ type: 'ASSIGN_WORKER', payload: { machineId: machine.id } });
         }
-    }
+    }, [canAssignWorker, machine.id, dispatch]);
 
-    const handleUnassignWorker = () => {
+    const handleUnassignWorker = useCallback(() => {
         if (machine.workers.length > 0) {
-            dispatch({ type: 'UNASSIGN_WORKER', payload: { machineId: machine.id } })
+            dispatch({ type: 'UNASSIGN_WORKER', payload: { machineId: machine.id } });
         }
-    }
+    }, [machine.workers.length, machine.id, dispatch]);
 
     return (
         <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
@@ -29,14 +36,8 @@ export default function MachineItem({ machine }: Props) {
             </div>
             <div className="p-6">
                 <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="flex items-center">
-                        <DollarSign className="w-5 h-5 text-gray-500 mr-2" />
-                        <span className="text-gray-700">Cost: {machine.cost}</span>
-                    </div>
-                    <div className="flex items-center">
-                        <TrendingUp className="w-5 h-5 text-gray-500 mr-2" />
-                        <span className="text-gray-700">Rate: {machine.rate}</span>
-                    </div>
+                    <InfoItem icon={<DollarSign />} label={`Gain: ${machine.gain}`} />
+                    <InfoItem icon={<TrendingUp />} label={`Rate: ${machine.rate}`} />
                 </div>
                 <div className="mb-4">
                     <div className="flex items-center mb-2">
@@ -45,30 +46,57 @@ export default function MachineItem({ machine }: Props) {
                     </div>
                 </div>
                 <div className="flex space-x-2">
-                    <button
+                    <ActionButton
                         onClick={handleAssignWorker}
-                        className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-white font-semibold transition-colors duration-300 ${availableWorker
-                            ? 'bg-green-500 hover:bg-green-600'
-                            : 'bg-gray-400 cursor-not-allowed'
-                            }`}
-                        disabled={!availableWorker}
-                    >
-                        <UserPlus className="w-5 h-5 mr-2" />
-                        Assign Worker
-                    </button>
-                    <button
+                        disabled={!canAssignWorker}
+                        className="bg-green-500 hover:bg-green-600"
+                        icon={<UserPlus />}
+                        label="Assign Worker"
+                    />
+                    <ActionButton
                         onClick={handleUnassignWorker}
-                        className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-white font-semibold transition-colors duration-300 ${machine.workers.length > 0
-                            ? 'bg-red-500 hover:bg-red-600'
-                            : 'bg-gray-400 cursor-not-allowed'
-                            }`}
                         disabled={machine.workers.length === 0}
-                    >
-                        <UserMinus className="w-5 h-5 mr-2" />
-                        Unassign Worker
-                    </button>
+                        className="bg-red-500 hover:bg-red-600"
+                        icon={<UserMinus />}
+                        label="Unassign Worker"
+                    />
                 </div>
             </div>
         </div>
-    )
+    );
 }
+
+interface InfoItemProps {
+    icon: React.ReactNode;
+    label: string;
+}
+
+const InfoItem: React.FC<InfoItemProps> = ({ icon, label }) => (
+    <div className="flex items-center">
+        {icon}
+        <span className="text-gray-700 ml-2">{label}</span>
+    </div>
+);
+
+interface ActionButtonProps {
+    onClick: () => void;
+    disabled: boolean;
+    className: string;
+    icon: React.ReactNode;
+    label: string;
+}
+
+const ActionButton: React.FC<ActionButtonProps> = ({ onClick, disabled, className, icon, label }) => (
+    <button
+        onClick={onClick}
+        className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-white font-semibold transition-colors duration-300 ${disabled
+            ? 'bg-gray-400 cursor-not-allowed'
+            : className
+            }`}
+        disabled={disabled}
+        aria-label={label}
+    >
+        {icon}
+        <span className="ml-2">{label}</span>
+    </button>
+);
