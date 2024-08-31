@@ -14,7 +14,7 @@ const RouterManager = () => {
                     <div className="max-w-6xl mx-auto">
                         <Routes>
                             <Route path="/" element={<App />} />
-                            {navItems.map(route => <Route path={route.path} element={route.element} />)}
+                            {navItems.map(route => <Route key={route.name} path={route.path} element={route.element} />)}
                         </Routes>
                     </div>
                 </div>

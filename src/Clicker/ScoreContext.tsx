@@ -1,5 +1,5 @@
 import React, { createContext, useReducer, useContext, ReactNode } from 'react';
-import { itemProgressions } from './db/itemProgressions';
+import { itemProgressions, limitOfItems } from './db/itemProgressions';
 import { LEVEL_THRESHOLDS } from './db/user'
 import { machineProgression } from './db/machines';
 
@@ -60,6 +60,7 @@ type State = {
 type Action =
     | { type: 'INCREMENT_SCORE'; payload: number }
     | { type: 'BUY_ITEM_UPGRADE'; payload: { id: string } }
+    | { type: 'BUY_ALL_ITEM_UPGRADES'; payload: { id: string } }
     | { type: 'AUTO_INCREMENT'; payload: { id: string; gain: number } }
     | { type: 'BUY_WORKER'; payload: { cost: number } }
     | { type: 'ASSIGN_WORKER'; payload: { machineId: string } }
@@ -67,7 +68,7 @@ type Action =
     | { type: 'BUY_MACHINE'; payload: Machine };
 
 const initialItemState = Object.keys(itemProgressions).map(item => ({
-    id: item, limit: 9, level: 0
+    id: item, limit: limitOfItems - 1, level: 0
 }));
 
 const initialState: State = {
@@ -104,6 +105,8 @@ const scoreReducer = (state: State, action: Action): State => {
             if (item.level >= item.limit) return state;
 
             const progression = itemProgressions[item.id][item.level];
+            if (!progression) return state;
+
             if (state.score < progression.cost) return state;
 
             const newItems = [...state.upgrades.items];
@@ -112,6 +115,43 @@ const scoreReducer = (state: State, action: Action): State => {
             return {
                 ...state,
                 score: state.score - progression.cost,
+                upgrades: {
+                    ...state.upgrades,
+                    items: newItems,
+                },
+            };
+        }
+
+        case 'BUY_ALL_ITEM_UPGRADES': {
+            const itemIndex = state.upgrades.items.findIndex((item) => item.id === action.payload.id);
+            if (itemIndex === -1) return state;
+
+            const item = state.upgrades.items[itemIndex];
+            if (item.level >= item.limit) return state;
+
+            let currentLevel = item.level;
+            let totalCost = 0;
+
+            // Intenta comprar tantas mejoras como sea posible
+            while (currentLevel < item.limit) {
+                const progression = itemProgressions[item.id][currentLevel];
+                if (!progression) break
+                if (state.score < totalCost + progression.cost) break; // Detén la compra si no hay suficiente puntuación
+
+                totalCost += progression.cost; // Suma el costo de la mejora actual
+                currentLevel++; // Incrementa el nivel del item
+            }
+
+            // Si no se pudieron comprar mejoras adicionales, no hagas cambios en el estado
+            if (currentLevel === item.level) return state;
+
+            // Actualiza el array de items con el nuevo nivel alcanzado
+            const newItems = [...state.upgrades.items];
+            newItems[itemIndex] = { ...item, level: currentLevel };
+
+            return {
+                ...state,
+                score: state.score - totalCost,
                 upgrades: {
                     ...state.upgrades,
                     items: newItems,
