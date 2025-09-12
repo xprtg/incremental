@@ -1,0 +1,1 @@
+function rewardPlayer(player: Player, reward: Reward) { player.rewards.push(reward); }
