@@ -1,0 +1,1 @@
+class Game { private points: number = 0; private pointRate: number = 1; private automatedRate: number = 0; public addPoints(amount: number): void { this.points += amount; } public upgradePointRate(): void { this.pointRate++; } public automatePointGeneration(): void { this.automatedRate++; } public tick(): void { this.points += this.automatedRate; } }
