@@ -1,0 +1,1 @@
+class Player { public level: number = 1; public rewards: Reward[] = []; }
