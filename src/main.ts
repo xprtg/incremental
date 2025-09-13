@@ -1,0 +1,6 @@
+import { Multiplier } from './multiplier';
+...
+private multiplier: Multiplier;
+constructor() { this.multiplier = new Multiplier(); }
+...
+updateScore(value: number): void { this.score += value * this.multiplier.getMultiplier(); }
